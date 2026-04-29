@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報名系統</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+        :root{
+            --blue:#2563eb;--blue-dark:#1d4ed8;--blue-light:#eff6ff;--blue-border:#bfdbfe;
+            --green:#16a34a;--green-light:#dcfce7;
+            --red:#dc2626;--red-light:#fee2e2;
+            --yellow-light:#fef9c3;--yellow-text:#a16207;
+            --gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+            --gray-400:#94a3b8;--gray-500:#64748b;--gray-700:#334155;--gray-900:#0f172a;
+            --radius:14px;--radius-sm:10px;--radius-full:999px;
+            --shadow:0 1px 4px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.12);
+            --header-h:56px;
+            --font:'Noto Sans TC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+            --font-base: 16px; /* 確保基礎字級足夠 */
+        }
+        html{font-size:16px;-webkit-text-size-adjust:100%;}
+        body{font-family:var(--font);background:var(--gray-100);color:var(--gray-900);min-height:100vh;overflow-x:hidden;}
+
+        .page{display:none;min-height:100vh;}
+        .page.active{display:block;}
+
+        /* Header */
+        .app-header{background:linear-gradient(135deg,#1a3a6b,var(--blue));color:white;padding:0 16px;height:var(--header-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+        .app-header h2{font-size:15px;font-weight:700;}
+        .btn-back{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:white;padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:600;min-height:36px;}
+        .btn-back:active{background:rgba(255,255,255,.3);}
+
+        /* Landing */
+        /* 修改後的 Landing 樣式 */
+        .landing {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* 讓內容在垂直方向平均分配空間，這樣即便只有一個卡片，標題也會往中間靠 */
+            justify-content: center;
+            padding: 40px 20px;
+            gap: 32px; /* 增加標題與卡片之間的間距，視覺更平衡 */
+            background: linear-gradient(160deg, #1a3a6b 0%, #2563eb 60%, #3b82f6 100%);
+            text-align: center;
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+
+
+        }
+
+        .landing {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            /* 加上一個中間過渡色，增加深邃感 */
+            background: linear-gradient(
+                    135deg,
+                    #1e3a8a 0%,    /* 深藍 */
+                    #2563eb 50%,   /* 標準藍 */
+                    #1d4ed8 100%   /* 稍微收尾的藍 */
+            );
+            /* 加上這個讓背景有一種磨砂質感 */
+            background-attachment: fixed;
+            text-align: center;
+        }
+
+        /* 確保標題上下有一定的比例，不被壓縮 */
+        .landing h1 {
+            color: white;
+            font-size: 26px; /* 稍微放大一點點，在手機上比例更好 */
+            font-weight: 800;
+            margin: 0;
+        }
+
+        /* 3. 卡片容器：重點在於排版模式 */
+        .landing-cards {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;  /* 當卡片未撐滿最大寬度時，整組置中 */
+            gap: 20px;                /* 卡片之間的間距 */
+            width: 100%;
+            max-width: 900px;         /* 根據 3 個卡片的寬度設定一個上限 */
+        }
+
+        /* 2. 標題區域：確保文字置中 */
+        .landing-logo { font-size: 50px; margin-bottom: 10px; text-align: center; }
+        .landing h1 { margin: 0; text-align: center; }
+        .landing p { margin-top: 8px; margin-bottom: 40px; text-align: center; }
+
+        /* 針對報名卡片進行特殊處理 */
+        .landing-card.primary {
+            border: 1.5px solid rgba(0, 255, 255, 0.4); /* 亮青色邊框 */
+            background: rgba(0, 255, 255, 0.05);       /* 帶一點點青色的底 */
+        }
+
+        .landing-card.primary:hover {
+            border-color: rgba(0, 255, 255, 0.8);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+
+
+        /* 4. 單一卡片：強制所有卡片擁有相同權重 */
+        .landing-card {
+            flex: 1;                  /* 重要！不論裡面文字多長，所有卡片寬度絕對一致 */
+            min-width: 0;             /* 防止內容撐開寬度 */
+            max-width: none;    /* ⭐ 取消限制 */
+
+            /* 讓卡片內部內容也置中 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15);
+            /* 增加一點點陰影讓卡片浮起來 */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            flex-direction: column;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 8px 32px rgba(0,0,0,.15);
+        }
+
+        .landing-card:active{ transform: scale(.97); background: rgba(255,255,255,0.22); }
+        .landing-card .card-icon{ font-size: 36px; }
+        .landing-card h3{ font-size: 16px; font-weight: 800; color: #ffffff; margin-bottom: 2px; }
+        .landing-card p{ font-size: 12px; color: rgba(255,255,255,0.85); line-height: 1.5; }
+
+        .landing-card:hover {
+            transform: translateY(-8px); /* 往上飄浮 */
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4); /* 邊框變亮 */
+            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1); /* 帶有微光的陰影 */
+        }
+
+        /* 2. 靜止狀態下：只給第二張卡片一點點顏色暗示 */
+        .landing-card:nth-child(2) {
+            border-color: rgba(0, 255, 255, 0.3); /* 淡淡的青色，不刺眼 */
+        }
+
+        /* 3. 所有卡片共用的 Hover 效果（你原本的版本） */
+        /* 這樣 Hover 時，不論哪一張都會變亮、往上飄 */
+        .landing-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.5); /* 統一變亮 */
+            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
+        }
+
+
+
+        /* User Tabs */
+        .user-tabs{display:flex;background:white;border-bottom:2px solid var(--gray-200);position:sticky;top:var(--header-h);z-index:100;}
+        .utab{flex:1;padding:13px 8px;border:none;background:transparent;font-size:14px;font-weight:700;color:var(--gray-400);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;}
+        .utab.active{color:var(--blue);border-bottom-color:var(--blue);}
+
+        /* Form */
+        .form-wrap{max-width:560px;margin:0 auto;padding:16px;}
+        .form-card{background:white;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+        .form-card h3{font-size:16px;font-weight:700;color:var(--gray-900);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--blue-light);}
+        .field{margin-bottom:16px;}
+
+        .field label{display:block;font-size:14px;font-weight:700;color:var(--gray-700);margin-bottom:8px;letter-spacing:.3px;}
+        .field label .req{color:var(--red);margin-left:2px;}
+        .field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:16px;color:var(--gray-900);outline:none;transition:border-color .15s;background:white;-webkit-appearance:none;font-family:var(--font);}
+        .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+        .field input::placeholder{color:var(--gray-200);}
+        .select-wrap{position:relative;}
+        .select-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--gray-400);pointer-events:none;font-size:14px;}
+        .select-wrap select{padding-right:36px;}
+
+        /* Sessions */
+        .sessions-grid{display:flex;flex-direction:column;gap:8px;}
+        .session-check{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;user-select:none;}
+        .session-check:active{transform:scale(.99);}
+        .session-check.selected{border-color:var(--blue);background:var(--blue-light);}
+        .session-check.full{opacity:.55;pointer-events:none;background:var(--gray-50);}
+        .session-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue);flex-shrink:0;}
+        .sess-info{flex:1;min-width:0;}
+        .sess-label{font-size:15px;font-weight:700;color:var(--gray-900);}
+        .sess-count{font-size:11px;color:var(--gray-400);margin-top:2px;}
+        .sess-badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:var(--radius-full);white-space:nowrap;flex-shrink:0;}
+        .sess-ok{background:var(--green-light);color:var(--green);}
+        .sess-warn{background:var(--yellow-light);color:var(--yellow-text);}
+        .sess-full{background:var(--red-light);color:var(--red);}
+
+        /* Buttons */
+        .btn-submit{width:100%;padding:15px;background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:white;border:none;border-radius:var(--radius-sm);font-size:18px;font-weight:700;cursor:pointer;transition:all .15s;margin-top:4px;min-height:56px;}
+        .btn-submit:active{opacity:.9;}
+        .btn-submit:disabled{opacity:.55;pointer-events:none;}
+        .btn-again{margin-top:14px;padding:12px 24px;background:var(--blue-light);color:var(--blue);border:1.5px solid var(--blue-border);border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;}
+
+        /* Results */
+        .result-card{background:white;border-radius:var(--radius);padding:28px 20px;text-align:center;box-shadow:var(--shadow);margin:16px;}
+        .result-icon{font-size:52px;margin-bottom:10px;}
+        .result-title{font-size:19px;font-weight:800;margin-bottom:6px;}
+        .result-desc{font-size:14px;color:var(--gray-500);line-height:1.7;}
+        .result-list{text-align:left;margin:14px 0;background:var(--gray-50);border-radius:var(--radius-sm);padding:12px 14px;}
+        .result-list li{font-size:13px;color:var(--gray-700);margin-bottom:6px;line-height:1.6;}
+
+        /* Query */
+        .reg-item{background:white;border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;border-left:4px solid var(--blue);box-shadow:var(--shadow);}
+        .reg-item.waitlist{border-left-color:var(--red);background:#fff5f5;}
+        .reg-session{font-size:14px;font-weight:700;margin-bottom:6px;}
+        .reg-rank{font-size:20px;font-weight:800;color:var(--blue);}
+        .reg-rank.wait{color:var(--red);}
+        .reg-meta{font-size:12px;color:var(--gray-500);}
+
+        /* Login */
+        .login-wrap{max-width:340px;margin:48px auto 0;padding:20px;}
+        .login-card{background:white;border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow-md);text-align:center;}
+        .login-card h3{font-size:18px;font-weight:800;margin-bottom:4px;}
+        .login-card>p{font-size:13px;color:var(--gray-500);margin-bottom:20px;}
+        .login-err{color:var(--red);font-size:13px;margin-top:10px;}
+
+        /* Admin Bar */
+        .admin-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:white;border-bottom:1px solid var(--gray-200);position:sticky;top:var(--header-h);z-index:100;gap:8px;flex-wrap:wrap;}
+        .updated-at{font-size:11px;color:var(--gray-400);}
+        .admin-btns{display:flex;gap:8px;}
+        .btn-sm{padding:8px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:none;min-height:36px;display:flex;align-items:center;gap:5px;transition:all .15s;}
+        .btn-sm:active{opacity:.8;}
+        .btn-sm:disabled{opacity:.45;pointer-events:none;}
+        .btn-refresh-sm{background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-border);}
+        .btn-rebuild{background:var(--green-light);color:var(--green);border:1px solid #bbf7d0;}
+
+        /* Summary */
+        .summary-row{display:flex;gap:10px;padding:12px 16px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+        .summary-row::-webkit-scrollbar{display:none;}
+        .sum-card{background:white;border-radius:var(--radius);padding:12px 14px;min-width:120px;flex-shrink:0;box-shadow:var(--shadow);cursor:pointer;border:2px solid transparent;transition:all .15s;}
+        .sum-card.active{border-color:var(--blue);background:var(--blue-light);}
+        .sum-card:active{transform:scale(.97);}
+        .sum-label{font-size:11px;color:var(--gray-500);margin-bottom:2px;}
+        .sum-count{font-size:20px;font-weight:800;}
+        .sum-sub{font-size:10px;color:var(--gray-400);margin-top:2px;}
+        .sum-bar{margin-top:6px;height:3px;background:var(--gray-200);border-radius:2px;overflow:hidden;}
+        .sum-fill{height:100%;border-radius:2px;}
+        .fill-g{background:#22c55e;}.fill-y{background:#f59e0b;}.fill-r{background:#ef4444;}
+
+        /* Admin Tabs */
+        .admin-tabs{display:flex;gap:4px;padding:10px 16px 0;border-bottom:1px solid var(--gray-200);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:var(--gray-50);}
+        .admin-tabs::-webkit-scrollbar{display:none;}
+        .admin-tab{padding:8px 16px;border-radius:var(--radius-sm) var(--radius-sm) 0 0;font-size:13px;font-weight:700;cursor:pointer;color:var(--gray-500);border:1px solid transparent;border-bottom:none;white-space:nowrap;transition:all .15s;flex-shrink:0;}
+        .admin-tab.active{color:var(--blue);background:white;border-color:var(--gray-200);margin-bottom:-1px;padding-bottom:9px;}
+
+        /* Admin Panel */
+        .admin-panel{display:none;padding:12px 16px;}
+        .admin-panel.active{display:block;}
+        .panel-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+        .panel-title{font-size:15px;font-weight:800;}
+        .panel-badges{display:flex;gap:6px;flex-wrap:wrap;}
+        .badge{padding:3px 10px;border-radius:var(--radius-full);font-size:11px;font-weight:700;}
+        .badge-ok{background:var(--green-light);color:var(--green);}
+        .badge-wait{background:var(--red-light);color:var(--red);}
+        .badge-st-ok{background:var(--green-light);color:#15803d;}
+        .badge-st-warn{background:var(--yellow-light);color:var(--yellow-text);}
+        .badge-st-full{background:var(--red-light);color:#b91c1c;}
+
+        /* Search */
+        .search-row{margin-bottom:10px;}
+        .search-input{width:100%;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:16px;outline:none;background:white;font-family:var(--font);}
+        .search-input:focus{border-color:var(--blue);}
+
+        /* ── CARD LIST（取代表格）── */
+        .reg-cards{display:flex;flex-direction:column;gap:10px;}
+        .reg-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border-left:4px solid var(--gray-200);transition:border-color .15s;}
+        .reg-card.wait-card{border-left-color:#f59e0b;}
+        .reg-card.done-card{border-left-color:var(--green);}
+
+        .reg-card-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;gap:8px;}
+        .reg-card-name{font-size:16px;font-weight:800;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .reg-card-num{font-size:12px;font-weight:700;color:var(--gray-400);background:var(--gray-100);border-radius:var(--radius-full);padding:2px 8px;flex-shrink:0;}
+        .reg-card-time{font-size:11px;color:var(--gray-400);flex-shrink:0;}
+
+        /* .reg-card-body{padding:0 14px 10px;display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;} */
+
+        /* 改後 */
+        .reg-card-body{padding:0 14px 10px;display:flex;flex-direction:column;gap:5px;}
+        .reg-card-row{font-size:14px;color:var(--gray-500);display:flex;align-items:center;gap:4px;}
+        .reg-card-row strong{color:var(--gray-900);font-weight:600;}
+        /* .reg-card-row.full{grid-column:1/-1;word-break:break-all;} */
+
+        /* 改成 */
+        .reg-card-row.full{word-break:break-all;}
+
+        .reg-card-footer{padding:10px 14px;background:var(--gray-50);border-top:1px solid var(--gray-100);display:flex;align-items:center;gap:10px;}
+        .note-ta{flex:1;padding:7px 10px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:14px;background:white;resize:none;font-family:var(--font);color:var(--gray-900);outline:none;min-height:36px;}
+        .note-ta:focus{border-color:var(--blue);}
+        .chk-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;}
+        .chk-wrap span{font-size:10px;color:var(--gray-400);font-weight:700;}
+        .chk-wrap input[type=checkbox]{width:24px;height:24px;accent-color:var(--blue);cursor:pointer;}
+
+        .st-tag{padding:3px 9px;border-radius:var(--radius-full);font-size:11px;font-weight:700;}
+        .st-ok{background:var(--green-light);color:#15803d;}
+        .st-wait{background:var(--yellow-light);color:var(--yellow-text);}
+
+        /* Toast */
+        .toast{position:fixed;bottom:max(24px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(80px);background:var(--gray-900);color:white;padding:11px 22px;border-radius:var(--radius-full);font-size:13px;font-weight:600;transition:transform .25s ease;z-index:999;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+        .toast.show{transform:translateX(-50%) translateY(0);}
+
+        /* Loading */
+        .loading-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;gap:14px;color:var(--gray-500);}
+        .spinner{width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+
+        @keyframes spin{to{transform:rotate(360deg);}}
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .landing {
+            /* ... 其他不變 ... */
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        .hint{font-size:12px;color:var(--gray-400);line-height:1.6;margin-top:-6px;}
+        .pad-bottom{height:max(24px,env(safe-area-inset-bottom));}
+
+        /* ── About Page ── */
+        .about-hero{background:linear-gradient(160deg,#1a3a6b 0%,#2563eb 100%);padding:40px 20px 32px;text-align:center;}
+        .about-hero-icon{font-size:52px;margin-bottom:12px;}
+        .about-hero h1{color:white;font-size:22px;font-weight:800;margin-bottom:8px;}
+        .about-hero p{color:rgba(255,255,255,.8);font-size:14px;line-height:1.8;white-space:pre-line;}
+        .about-section{max-width:560px;margin:0 auto;padding:16px;}
+        .about-card{background:white;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:12px;}
+        .about-card-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;color:var(--gray-900);margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--blue-light);}
+        .about-card p{font-size:14px;color:var(--gray-700);line-height:1.8;}
+        .about-info-row{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--gray-100);align-items:flex-start;}
+        .about-info-row:last-child{border-bottom:none;}
+        .about-info-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+        .about-info-text{font-size:14px;color:var(--gray-700);line-height:1.7;flex:1;}
+        .about-info-text strong{color:var(--gray-900);display:block;margin-bottom:2px;}
+        .about-notice{background:var(--yellow-light);border-radius:var(--radius-sm);padding:12px 14px;margin-top:4px;}
+        .about-notice p{font-size:13px;color:var(--yellow-text);line-height:1.8;}
+        .about-cta{background:linear-gradient(135deg,var(--blue),var(--blue-dark));border-radius:var(--radius);padding:24px 20px;text-align:center;margin-bottom:12px;}
+        .about-cta p{color:rgba(255,255,255,.85);font-size:13px;margin-bottom:14px;}
+        .btn-cta{display:inline-block;background:white;color:var(--blue);padding:12px 32px;border-radius:var(--radius-sm);font-size:15px;font-weight:800;cursor:pointer;border:none;transition:transform .15s;}
+        .btn-cta:active{transform:scale(.97);}
+
+
+
+        /* ─── 在這裡加入 Media Queries ─── */
+        @media (min-width: 768px) {
+            /* 當螢幕寬度大於 768px (平板或桌機) 時執行 */
+            /* 2. 針對頁面容器增加間距，避免在手機上看起來太擠 */
+            .form-wrap {
+                max-width: 560px;
+                margin: 0 auto;
+                padding: 20px 16px; /* 增加上下間距 */
+            }
+
+            .app-header h2 {
+                font-size: 20px; /* 大螢幕標題放大 */
+            }
+
+            .landing-cards {
+                flex-direction: row;
+                justify-content: center;
+                max-width: 900px;
+                flex-wrap: wrap;
+            }
+
+            .landing-card {
+                flex: 1;
+                max-width: 280px; /* ⭐ 只在桌機限制 */
+            }
+        }
+
+        @media (max-width: 375px) {
+            /* 針對極小螢幕 (如舊款 iPhone) 的微調 */
+            .landing-logo {
+                font-size: 40px;
+            }
+            .landing h1 {
+                font-size: 18px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div class="page active" id="page-landing">
+    <div class="landing">
+        <div class="landing-logo">🌿</div>
+        <h1>先聊再說</h1>
+        <div class="landing-cards">
+            <div class="landing-card" onclick="showPage('page-about')">
+                <div class="card-icon">✨</div>
+                <div><h3>活動介紹</h3><p>了解先聊再說是什麼活動</p></div>
+            </div>
+
+            <div class="landing-card" onclick="sessionStorage.setItem('defaultTab', 'query'); showPage('page-user')">
+                <div class="card-icon">📝</div>
+                <div><h3>查詢</h3><p>查詢報名狀態</p></div>
+            </div>
+
+            <!-- 改後：預設隱藏，只有 #admin 才顯示 -->
+            <div class="landing-card" id="admin-card" onclick="showPage('page-login')" style="display:none;">
+                <div class="card-icon">🔐</div>
+                <div><h3>管理者</h3><p>查看名單、備註、確認報名狀態</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ABOUT PAGE -->
+<div class="page" id="page-about">
+    <div class="app-header">
+        <button class="btn-back" onclick="showPage('page-landing')">← 返回</button>
+        <h2>✨ 活動介紹</h2>
+        <div style="width:60px"></div>
+    </div>
+
+    <div class="about-hero">
+        <div class="about-hero-icon">☕</div>
+        <h1>先聊再說</h1>
+        <p>不用完整的自我介紹，也不用急著定義關係。
+            沒有尷尬的破冰遊戲，沒有一定要留下聯絡方式的壓力。
+            我們只是剛好在固定的假日中午，
+            找一群人一起吃飯、聊天——
+            輕鬆地，剛剛好。
+        </p>
+        <p>
+            這裡會有一些主題，讓對話更容易開始：
+            星座、血型、MBTI，或是穿搭、髮型、生活習慣……
+            你可以從有共鳴的話題加入，也可以隨著聊天慢慢延伸到任何你想聊的事。
+
+            不只兩性，不只交友，
+            而是透過各種主題，認識不同的人、不同的想法。
+
+            你會在不同的小話題裡，慢慢認識幾個人——
+            也許只是交換想法，也許剛好聊得來。
+            至於之後會發生什麼，
+
+
+            先聊，再說。
+        </p>
+    </div>
+
+    <div class="about-section">
+
+        <div class="about-card">
+            <div class="about-card-title">📋 活動資訊</div>
+            <div class="about-info-row">
+                <span class="about-info-icon">💰</span>
+                <div class="about-info-text"><strong>費用</strong>每人 1,000 元（含餐）</div>
+            </div>
+            <div class="about-info-row">
+                <span class="about-info-icon">📍</span>
+                <div class="about-info-text">
+                    <strong>地點</strong>
+                    秘徑咖啡 Alley's cafe B1<br>
+                    <span style="color:var(--gray-400);font-size:13px">捷運萬隆站 1 號出口後方</span>
+                </div>
+            </div>
+            <div class="about-info-row">
+                <span class="about-info-icon">🗓️</span>
+                <div class="about-info-text"><strong>時間</strong>固定假日中午（詳見報名頁場次）</div>
+            </div>
+        </div>
+
+        <div class="about-card">
+            <div class="about-card-title">⚠️ 注意事項</div>
+            <div class="about-notice">
+                <p>📌 <strong>取消規定</strong><br>
+                    因故需臨時當日取消，可延場一次。<br>
+                    請告知欲延期之場次日期。</p>
+                <br>
+                <p>💳 <strong>退款規定</strong><br>
+                    活動當日前 3 日取消 → 退款 90%<br>
+                    當日取消 → 不退款</p>
+            </div>
+        </div>
+
+        <div class="about-cta">
+            <p>看起來不錯？立刻來報名吧！</p>
+            <button class="btn-cta" onclick="showPage('page-user')">我要報名 →</button>
+        </div>
+
+        <div class="pad-bottom"></div>
+    </div>
+</div>
+
+
+<!-- USER PAGE -->
+<div class="page" id="page-user">
+    <div class="app-header">
+        <button class="btn-back" onclick="showPage('page-landing')">← 返回</button>
+        <h2>查詢</h2>
+        <div style="width:60px"></div>
+    </div>
+    <div class="user-tabs">
+        <button class="utab" id="utab-reg" onclick="switchUserTab('reg')">✍️ 報名表單</button>
+        <button class="utab active" id="utab-query" onclick="switchUserTab('query')">🔍 查詢狀態</button>
+    </div>
+
+    <div id="upanel-reg">
+        <div id="reg-form-view">
+            <div class="form-wrap">
+                <div class="form-card">
+                    <h3>個人資料</h3>
+                    <div class="field"><label>姓名<span class="req">*</span></label><input id="f-name" type="text" placeholder="請輸入姓名" autocomplete="name"></div>
+                    <div class="field"><label>性別<span class="req">*</span></label>
+                        <div class="select-wrap"><select id="f-gender"><option value="">請選擇</option><option>男</option><option>女</option><option>其他</option></select></div>
+                    </div>
+                    <div class="field"><label>年紀<span class="req">*</span></label><input id="f-age" type="number" inputmode="numeric" min="1" max="120" placeholder="例：25"></div>
+                    <!-- 改後 -->
+                    <div class="field"><label>IG 帳號<span class="req">*</span></label>
+
+                        <input id="f-ig" type="text" placeholder="@username" autocomplete="off"></div>
+                    <div class="field"><label>個人 E-Mail<span class="req">*</span></label><input id="f-email" type="email" inputmode="email" placeholder="example@gmail.com" autocomplete="email"></div>
+                </div>
+                <div class="form-card">
+                    <h3>報名場次<span class="req">*</span></h3>
+                    <div id="sessions-loading" class="loading-overlay" style="padding:24px;"><div class="spinner"></div><div style="font-size:13px">載入場次中…</div></div>
+                    <div id="sessions-grid" class="sessions-grid" style="display:none;"></div>
+                </div>
+                <div class="form-card">
+                    <h3>付款資訊</h3>
+                    <div style="background:var(--blue-light);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;">
+                        <div style="font-size:12px;color:var(--gray-500);margin-bottom:4px;font-weight:700;">匯款帳號</div>
+                        <div style="font-size:15px;font-weight:800;color:var(--gray-900);letter-spacing:1px;">（812）台新銀行</div>
+                        <div style="font-size:18px;font-weight:800;color:var(--blue);letter-spacing:2px;margin-top:4px;">28881020086812</div>
+                    </div>
+                    <div>
+                        <!-- 新增這行 -->
+                        <p style="font-size:13px;color:#dc2626;font-weight:700;margin-top:6px;">⚠️ 請於報名後 2 日內完成匯款，逾時將取消報名資格</p>
+                    </div>
+                    <div class="field"><label>匯款後五碼<span class="req">*</span></label>
+                        <input id="f-pay" type="text" inputmode="numeric" maxlength="5" placeholder="例：86123">
+                    </div>
+                    <p class="hint">※ 請填入您匯款帳戶的後五碼供核對，非收款帳號後五碼</p>
+                </div>
+                <button class="btn-submit" id="btn-submit" onclick="submitForm()">確認送出報名 →</button>
+                <div class="pad-bottom"></div>
+            </div>
+        </div>
+
+        <div id="reg-success-view" style="display:none;">
+            <div class="result-card">
+                <div class="result-icon">🎉</div>
+                <div class="result-title">報名成功！</div>
+                <div class="result-desc">確認信已寄至您的信箱<br>請記得完成匯款</div>
+                <ul class="result-list" id="reg-success-detail"></ul>
+                <button class="btn-again" onclick="resetForm()">繼續報名其他場次</button>
+            </div>
+        </div>
+
+        <div id="reg-dup-view" style="display:none;">
+            <div class="result-card">
+                <div class="result-icon">⚠️</div>
+                <div class="result-title">已重複報名</div>
+                <div class="result-desc" id="dup-detail">您已報名以下場次</div>
+                <button class="btn-again" onclick="showRegForm()">返回修改</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="upanel-query" style="display:none;">
+        <div class="form-wrap">
+            <div class="form-card">
+                <h3>查詢報名狀態</h3>
+                <div class="field"><label>您的 E-Mail<span class="req">*</span></label>
+                    <input id="q-email" type="email" inputmode="email" placeholder="報名時填寫的 Email" autocomplete="email" onkeydown="if(event.key==='Enter')queryStatus()">
+                </div>
+                <button class="btn-submit" id="btn-query" onclick="queryStatus()">查詢 →</button>
+            </div>
+            <div id="query-result"></div>
+            <div class="pad-bottom"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div class="page" id="page-login">
+    <div class="app-header">
+        <button class="btn-back" onclick="showPage('page-landing')">← 返回</button>
+        <h2>🔐 管理者登入</h2>
+        <div style="width:60px"></div>
+    </div>
+    <div class="login-wrap">
+        <div class="login-card">
+            <h3>管理者登入</h3>
+            <p>請輸入管理密碼繼續</p>
+            <div class="field"><input id="admin-pw" type="password" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')doLogin()"></div>
+            <button class="btn-submit" id="btn-login" onclick="doLogin()">登入</button>
+            <div class="login-err" id="login-err" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="page" id="page-admin">
+    <div class="app-header">
+        <button class="btn-back" onclick="showPage('page-landing')">← 登出</button>
+        <h2>📋 報名管理</h2>
+        <div style="width:60px"></div>
+    </div>
+    <div class="admin-bar">
+        <span class="updated-at" id="admin-updated">—</span>
+        <div class="admin-btns">
+            <button class="btn-sm btn-rebuild" id="btn-rebuild" onclick="rebuildStats()">📊 更新統計</button>
+            <button class="btn-sm btn-refresh-sm" id="btn-refresh" onclick="loadAdminData()">🔄 重整</button>
+        </div>
+    </div>
+    <div id="admin-loading" class="loading-overlay"><div class="spinner"></div><div style="font-size:13px">載入中…</div></div>
+    <div id="admin-main" style="display:none;">
+        <div class="summary-row" id="admin-summary"></div>
+        <div class="admin-tabs" id="admin-tabs"></div>
+        <div id="admin-panels"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+    async function verifyREST() {
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                // 關鍵修正：將 application/json 改為 text/plain
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify({ action: 'ping' })
+            });
+
+            console.log('HTTP Status:', res.status);
+
+            // 注意：GAS 回傳時通常會經過重新導向，fetch 會自動處理
+            const data = await res.json();
+            console.log('JSON Response:', data);
+
+        } catch (err) {
+            console.error('Fetch 失敗，原因可能是：');
+            console.error('1. API_URL 錯誤或未部署為「所有人」');
+            console.error('2. 依舊觸發了 CORS 限制（請檢查 Headers）');
+            console.error('詳細錯誤訊息:', err);
+        }
+    }
+
+    // 判斷網址是否有 #admin，有才顯示管理者入口
+    (function() {
+        if (window.location.hash === '#admin') {
+            window.addEventListener('load', function() {
+                const card = document.getElementById('admin-card');
+                if (card) card.style.display = 'flex';
+            });
+        }
+    })();
+
+    // ── API 設定（GitHub Pages 版本）──
+    // ✅ 請把下面這行換成你的 Apps Script 部署網址
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzcTwBNqIhBdIT-63DS-5CHDO3FGLw6C7cORdvZisJ5JgGVARHsnHj_MyIz2HluCaxzww/exec';
+
+    // ── 讀取用 JSONP（doGet）──
+    function callAPI(action, payload = {}) {
+        return new Promise((resolve, reject) => {
+            const cbName = '_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+            const timer = setTimeout(() => {
+                delete window[cbName];
+                document.getElementById(cbName)?.remove();
+                reject(new Error('請求逾時'));
+            }, 10000);
+            window[cbName] = (data) => {
+                clearTimeout(timer);
+                delete window[cbName];
+                document.getElementById(cbName)?.remove();
+                resolve(data);
+            };
+            const params = new URLSearchParams({
+                action:   action,
+                payload:  JSON.stringify(payload),
+                callback: cbName
+            });
+            const script = document.createElement('script');
+            script.id  = cbName;
+            script.src = `${API_URL}?${params}`;
+            script.onerror = () => {
+                clearTimeout(timer);
+                delete window[cbName];
+                script.remove();
+                reject(new Error('請求失敗'));
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    // ── 寫入/敏感操作用 doPost（no-cors，不讀回應）──
+    /*
+    async function callAPIPost(action, payload = {}) {
+    try {
+      await fetch(API_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body:    JSON.stringify({ action, payload }),
+        mode:    'no-cors'
+      });
+      return { ok: true };
+    } catch(err) {
+      return { ok: false, error: err.message };
+    }
+  }
+
+
+    function callAPIPost(action, payload = {}) {
+    return fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ action, payload })
+    })
+    .then(res => res.json());
+  }
+
+    */
+
+
+
+    async function callAPIPost(action, payload = {}) {
+        console.log('📡 callAPIPost 送出：', action);
+        try {
+            const res = await fetch(API_URL, {
+                method:  'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body:    JSON.stringify({ action, payload })
+            });
+            console.log('📡 HTTP status：', res.status);
+            if (!res.ok) throw new Error('網路回應異常 HTTP ' + res.status);
+            const text = await res.text();
+            console.log('📡 回應內容：', text);
+            const data = JSON.parse(text);
+            // ✅ 直接回傳 data，讓呼叫方自己判斷 ok/duplicate/error
+            return data;
+        } catch(err) {
+            console.error('📡 callAPIPost 失敗：', err.message);
+            throw err;
+        }
+    }
+
+    // ── Router ──
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        window.scrollTo(0,0);
+
+        if (id === 'page-admin') loadAdminData();
+
+        if (id === 'page-user') {
+            loadSessions();
+
+            // ⭐ 新增這段（關鍵）
+            const tab = sessionStorage.getItem("defaultTab");
+
+            if (tab === "query") {
+                switchUserTab("query");
+            } else {
+                switchUserTab("reg");
+            }
+
+            sessionStorage.removeItem("defaultTab"); // 用完清掉
+        }
+    }
+
+    // ── User: 報名 ──
+    let availSessions = [];
+
+    function switchUserTab(tab) {
+        const isReg = tab === 'reg';
+        document.getElementById('upanel-reg').style.display   = isReg  ? 'block' : 'none';
+        document.getElementById('upanel-query').style.display = !isReg ? 'block' : 'none';
+        document.getElementById('utab-reg').classList.toggle('active', isReg);
+        document.getElementById('utab-query').classList.toggle('active', !isReg);
+        if (isReg && !availSessions.length) loadSessions();
+    }
+
+    function loadSessions() {
+        document.getElementById('sessions-loading').style.display = 'flex';
+        document.getElementById('sessions-grid').style.display    = 'none';
+        callAPI('getAvailableSessions')
+            .then(res => {
+                document.getElementById('sessions-loading').style.display = 'none';
+                document.getElementById('sessions-grid').style.display    = 'flex';
+                if (!res.ok || !res.sessions) { document.getElementById('sessions-grid').innerHTML = '<p style="color:var(--gray-400);font-size:13px">暫無可報名場次</p>'; return; }
+                availSessions = res.sessions;
+                renderSessionCheckboxes(res.sessions);
+            })
+            .catch(() => { document.getElementById('sessions-loading').style.display = 'none'; });
+    }
+
+    function renderSessionCheckboxes(sessions) {
+        const grid = document.getElementById('sessions-grid');
+        grid.innerHTML = '';
+        sessions.forEach(s => {
+            const isFull = (s.isFull === true || String(s.isFull).toLowerCase() === 'true');
+            const pct   = s.fillRate;
+            const stCls = s.isFull ? 'sess-full' : pct >= 70 ? 'sess-warn' : 'sess-ok';
+            const stTxt = s.isFull ? '🔴 額滿' : pct >= 70 ? '🟡 即將額滿' : `🟢 剩 ${s.cap - s.count} 位`;
+            const lbl   = document.createElement('label');
+            lbl.className = 'session-check' + (isFull ? ' full' : ''); // 這裡也要用新的 isFull
+            lbl.innerHTML = `
+     <input type="checkbox" value="${esc(s.code)}" ${isFull ? 'disabled' : ''}
+      onchange="this.closest('.session-check').classList.toggle('selected',this.checked)">
+      <div class="sess-info">
+        <div class="sess-label">${esc(s.label)}</div>
+        <div class="sess-count">報名人數：${s.count} / ${s.cap}</div>
+      </div>
+      <span class="sess-badge ${stCls}">${stTxt}</span>`;
+            grid.appendChild(lbl);
+        });
+    }
+
+    function getSelectedSessions() {
+        return [...document.querySelectorAll('#sessions-grid input[type=checkbox]:checked')].map(cb => cb.value);
+    }
+
+    async function submitForm() {
+        // 1. 取得與清理欄位資料
+        const name = document.getElementById('f-name').value.trim();
+        const gender = document.getElementById('f-gender').value;
+        const age = document.getElementById('f-age').value.trim();
+        const ig = document.getElementById('f-ig').value.trim();
+        const email = document.getElementById('f-email').value.trim();
+        const pay = document.getElementById('f-pay').value.trim();
+        const sessions = getSelectedSessions();
+
+        // 2. 基本驗證 (你原本的邏輯)
+        if (!name)                        { showToast('⚠️ 請填寫姓名'); return; }
+        if (name.length < 2)              { showToast('⚠️ 姓名至少需要 2 個字'); return; }
+        if (/[0-9!@#$%^&*()_+]/.test(name)) { showToast('⚠️ 姓名不能包含數字或特殊符號'); return; }
+        if (!gender) { showToast('⚠️ 請選擇性別'); return; }
+        if (!age)                  { showToast('⚠️ 請填寫年齡'); return; }
+        if (!/^\d+$/.test(age))    { showToast('⚠️ 年齡請填寫數字'); return; }
+        if (age < 18 || age > 100) { showToast('⚠️ 年齡請填寫 18–100 之間'); return; }
+        if (!email) { showToast('⚠️ 請填寫 Email'); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('⚠️ Email 格式不正確'); return; }
+        if (!sessions.length) { showToast('⚠️ 請選擇至少一個場次'); return; }
+        if (!ig) { showToast('⚠️ 請填寫 IG 帳號'); return; }
+        const igClean = ig.startsWith('@') ? ig.slice(1) : ig;
+        if (!/^[a-zA-Z0-9._]{1,30}$/.test(igClean)) { showToast('⚠️ IG 格式錯誤'); return; }
+        if (!pay) { showToast('⚠️ 請填寫匯款後五碼'); return; }
+        if (!/^\d{5}$/.test(pay)) { showToast('⚠️ 後五碼必須是 5 位數字'); return; }
+
+        // 3. UI 鎖定
+        const btn = document.getElementById('btn-submit');
+        btn.disabled = true;
+        btn.textContent = '⏳ 送出中…';
+
+        let attempts = 0;
+        const maxAttempts = 5;
+        let submitRes = null;
+
+        // 4. 送出報名 (包含系統忙碌自動重試)
+        while (attempts < maxAttempts) {
+            try {
+                submitRes = await callAPIPost('submitRegistration', {
+                    name, gender, age, ig, email, pay, sessions
+                });
+
+                // 如果成功或是業務邏輯錯誤 (重複、額滿)，就跳出迴圈
+                if (submitRes.ok || submitRes.duplicate || submitRes.full) break;
+
+                // 只有在「系統忙碌」時才觸發重試
+                if (submitRes.error === '系統忙碌中，請稍後再試' && attempts < maxAttempts - 1) {
+                    attempts++;
+                    btn.textContent = `⏳ 系統忙碌，重試中 (${attempts}/3)`;
+                    const delay = 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    continue;
+                }
+
+                // 其他未知錯誤也跳出
+                break;
+
+            } catch (err) {
+                console.error('Submit Error:', err);
+                if (attempts < maxAttempts - 1) {
+                    attempts++;
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                } else {
+                    showToast('❌ 連線異常：' + err.message);
+                    resetSubmitBtn(btn);
+                    return;
+                }
+            }
+        }
+
+        // 5. 處理最終提交結果 (處理你原本設計的重複報名與錯誤邏輯)
+        if (!submitRes) {
+            showToast('❌ 無法連線至伺服器');
+            resetSubmitBtn(btn);
+            return;
+        }
+
+        // --- 處理重複報名 (恢復你原本的設計) ---
+        if (submitRes.duplicate) {
+            resetSubmitBtn(btn);
+            showRegDuplicate(submitRes.duplicateSessions);
+            return;
+        }
+
+        // --- 處理其他非成功錯誤 (例如額滿) ---
+        if (!submitRes.ok) {
+            resetSubmitBtn(btn);
+            showToast('❌ ' + (submitRes.error || '送出失敗'));
+            return;
+        }
+
+        // 6. 寫入成功後的查詢確認 (Retry 邏輯)
+        try {
+            btn.textContent = '整理資料中...';
+            const res = await queryWithRetry(email, 5, 500);
+
+            resetSubmitBtn(btn);
+
+            if (res.found) {
+                showRegSuccess({ name, sessions, email });
+            } else {
+                // 雖然查不到，但既然 submitRes.ok 為真，仍顯示成功畫面
+                showRegSuccess({ name, sessions, email });
+                // 背景靜默再次更新
+                setTimeout(async () => {
+                    await callAPI('queryMyRegistration', { email });
+                }, 3000);
+            }
+        } catch (err) {
+            resetSubmitBtn(btn);
+            showRegSuccess({ name, sessions, email });
+        }
+    }
+
+    /** 輔助：恢復按鈕狀態 */
+    function resetSubmitBtn(btn) {
+        btn.disabled = false;
+        btn.textContent = '確認送出報名 →';
+    }
+
+
+
+    async function queryWithRetry(email, maxRetry = 5, delay = 400) {
+        for (let i = 0; i < maxRetry; i++) {
+            if (i > 0) await new Promise(r => setTimeout(r, delay));
+            const res = await callAPI('queryMyRegistration', { email });
+            if (res.found) {
+                console.log(`✅ 第 ${i+1} 次成功`);
+                return res;
+            }
+            console.log(`⏳ 第 ${i+1} 次查不到，繼續重試...`);
+        }
+        console.log('❌ retry 後仍查不到');
+        return { found: false };
+    }
+
+
+    function showRegSuccess(data) {
+        document.getElementById('reg-form-view').style.display    = 'none';
+        document.getElementById('reg-success-view').style.display = 'block';
+        document.getElementById('reg-dup-view').style.display     = 'none';
+        document.getElementById('reg-success-detail').innerHTML   =
+            `<li>👤 姓名：${esc(data.name)}</li><li>🗓️ 場次：${data.sessions.map(s=>esc(s)).join('、')}</li><li>📧 確認信：${esc(data.email)}</li>`;
+    }
+    function showRegDuplicate(dups) {
+        document.getElementById('reg-form-view').style.display    = 'none';
+        document.getElementById('reg-success-view').style.display = 'none';
+        document.getElementById('reg-dup-view').style.display     = 'block';
+        document.getElementById('dup-detail').textContent = '您已報名以下場次：' + dups.join('、');
+    }
+    function showRegForm() {
+        document.getElementById('reg-form-view').style.display    = 'block';
+        document.getElementById('reg-success-view').style.display = 'none';
+        document.getElementById('reg-dup-view').style.display     = 'none';
+    }
+    function resetForm() {
+        ['f-name','f-ig','f-email','f-pay'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('f-gender').value = '';
+        document.getElementById('f-age').value    = '';
+        document.querySelectorAll('#sessions-grid input').forEach(cb => { cb.checked = false; cb.closest('.session-check').classList.remove('selected'); });
+        showRegForm(); availSessions = []; loadSessions();
+    }
+
+    // ── User: 查詢 ──
+    function queryStatus() {
+        const email = document.getElementById('q-email').value.trim();
+        if (!email) { showToast('⚠️ 請輸入 Email'); return; }
+        const btn = document.getElementById('btn-query');
+        btn.disabled = true; btn.textContent = '⏳ 查詢中…';
+        document.getElementById('query-result').innerHTML = '';
+        callAPI('queryMyRegistration', { email })
+            .then(res => { btn.disabled = false; btn.textContent = '查詢 →'; renderQueryResult(res, email); })
+            .catch(err => { btn.disabled = false; btn.textContent = '查詢 →'; showToast('❌ ' + err.message); });
+    }
+
+    function renderQueryResult(res, email) {
+        const el = document.getElementById('query-result');
+        if (!res.ok) { el.innerHTML = `<div class="result-card"><div class="result-icon">❌</div><div class="result-title">${esc(res.error)}</div></div>`; return; }
+        if (!res.found) { el.innerHTML = `<div class="result-card"><div class="result-icon">🔍</div><div class="result-title">查無資料</div><div class="result-desc">找不到 ${esc(email)} 的報名紀錄<br>請確認 Email 是否正確</div></div>`; return; }
+        let html = '';
+        res.registrations.forEach(r => {
+            html += `<div class="reg-item${r.waitlist?' waitlist':''}">
+      <div class="reg-session">${r.waitlist?'⏳':'✅'} ${esc(r.sessionLabel)}</div>
+      <div style="display:flex;align-items:baseline;gap:8px;margin:6px 0">
+        <span class="reg-rank${r.waitlist?' wait':''}">${r.waitlist?'候補':'正取'}</span>
+        <span style="font-size:13px;color:var(--gray-700)">第 ${r.rank} 位 / 上限 ${r.cap} 位</span>
+      </div>
+      <div class="reg-meta">🕐 報名時間：${esc(r.time)}</div>
+      ${r.waitlist?`<div class="reg-meta" style="color:var(--red);margin-top:4px">目前排候補，若有缺額將優先通知您</div>`:''}
+    </div>`;
+        });
+        el.innerHTML = html;
+    }
+
+    // ── Admin: Login ──
+    function doLogin() {
+        const pw = document.getElementById('admin-pw').value;
+        const btn = document.getElementById('btn-login');
+        const err = document.getElementById('login-err');
+        btn.disabled = true; btn.textContent = '驗證中…'; err.style.display = 'none';
+        callAPI('adminLogin', { password: pw })
+            .then(res => { btn.disabled = false; btn.textContent = '登入'; if (res.ok) showPage('page-admin'); else { err.textContent = res.error; err.style.display = 'block'; } })
+            .catch(e => { btn.disabled = false; btn.textContent = '登入'; err.textContent = e.message; err.style.display = 'block'; });
+    }
+
+    // ── Admin: Dashboard ──
+    let adminData = null, adminTabIdx = 0;
+
+    function loadAdminData() {
+        const btn = document.getElementById('btn-refresh');
+        btn.disabled = true; btn.textContent = '⏳';
+        document.getElementById('admin-loading').style.display = 'flex';
+        document.getElementById('admin-main').style.display    = 'none';
+        callAPI('getRegistrationData')
+            .then(data => {
+                console.log('API 回傳:', data);
+                btn.disabled = false; btn.textContent = '🔄 重整';
+                document.getElementById('admin-loading').style.display = 'none';
+                if (data.error) { showToast('❌ ' + data.error); return; }
+                adminData = data; renderAdmin();
+            })
+            .catch(e => { btn.disabled = false; btn.textContent = '🔄 重整'; showToast('❌ ' + e.message); });
+    }
+
+    function renderAdmin() {
+        document.getElementById('admin-main').style.display  = 'block';
+        document.getElementById('admin-updated').textContent = '更新：' + adminData.updatedAt;
+        renderAdminSummary(); renderAdminTabs(); renderAdminPanels();
+    }
+
+    function renderAdminSummary() {
+        const bar = document.getElementById('admin-summary');
+        bar.innerHTML = '';
+        adminData.sessions.forEach((s,i) => {
+            const pct = s.fillRate, cls = pct>=100?'fill-r':pct>=70?'fill-y':'fill-g', icon = pct>=100?'🔴':pct>=70?'🟡':'🟢';
+            const card = document.createElement('div');
+            card.className = 'sum-card' + (i===adminTabIdx?' active':'');
+            card.innerHTML = `<div class="sum-label">${esc(s.label)}</div><div class="sum-count">${s.confirmed}<span style="font-size:12px;font-weight:400;color:var(--gray-400)"> / ${s.cap}</span></div><div class="sum-sub">${icon} ${pct}%${s.waitlist>0?' ・候補'+s.waitlist:''}</div><div class="sum-bar"><div class="sum-fill ${cls}" style="width:${Math.min(pct,100)}%"></div></div>`;
+            card.onclick = () => switchAdminTab(i);
+            bar.appendChild(card);
+        });
+    }
+
+    function renderAdminTabs() {
+        const tabs = document.getElementById('admin-tabs');
+        tabs.innerHTML = '';
+        adminData.sessions.forEach((s,i) => {
+            const tab = document.createElement('div');
+            tab.className = 'admin-tab' + (i===adminTabIdx?' active':'');
+            tab.textContent = s.label;
+            tab.onclick = () => switchAdminTab(i);
+            tabs.appendChild(tab);
+        });
+    }
+
+    function renderAdminPanels() {
+        const panels = document.getElementById('admin-panels');
+        panels.innerHTML = '';
+        adminData.sessions.forEach((s,i) => {
+            const div = document.createElement('div');
+            div.className = 'admin-panel' + (i===adminTabIdx?' active':'');
+            div.id = 'apanel-' + i;
+            div.innerHTML = buildAdminPanel(s,i);
+            panels.appendChild(div);
+        });
+        syncNotesToUI();
+    }
+    function syncNotesToUI() {
+        console.log('SYNC START');
+        document.querySelectorAll('.note-ta').forEach(ta => {
+            const key = ta.dataset.key;
+
+            const found = adminData.sessions
+                .flatMap(s => s.registrants)
+                .find(r => r.key === key);
+            console.log('SYNC', key, '=>', found?.note);
+
+            if (found) {
+                ta.value = found.note || '';
+            }
+        });
+    }
+
+    function buildAdminPanel(s, pi) {
+        const pct   = s.fillRate;
+        const stCls = pct>=100?'badge-st-full':pct>=70?'badge-st-warn':'badge-st-ok';
+        const stTxt = pct>=100?'🔴 額滿':pct>=70?'🟡 即將額滿':'🟢 名額充足';
+
+        let cards = '';
+        if (!s.registrants.length) {
+            cards = `<div style="text-align:center;padding:40px;color:var(--gray-400)">尚無報名資料</div>`;
+        } else {
+            s.registrants.forEach((p,idx) => {
+                const cardCls = p.checked ? 'done-card' : p.waitlist ? 'wait-card' : '';
+                const stTag   = p.waitlist ? '<span class="st-tag st-wait">候補</span>' : '<span class="st-tag st-ok">正取</span>';
+                const k = escAttr(p.key);
+                cards += `
+        <div class="reg-card ${cardCls}" id="arow-${pi}-${idx}">
+          <div class="reg-card-top">
+            <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+              <span class="reg-card-num">#${p.number}</span>
+              ${stTag}
+              <span class="reg-card-name">${esc(p.name)}</span>
+            </div>
+            <span class="reg-card-time">${esc(p.time)}</span>
+          </div>
+          <div class="reg-card-body">
+            <div class="reg-card-row">👤 ${esc(p.gender)} · ${esc(String(p.age))}歲</div>
+            ${p.pay ? `<div class="reg-card-row">💳 <strong>${esc(p.pay)}</strong></div>` : '<div></div>'}
+            ${p.ig  ? `<div class="reg-card-row full">📸 <strong>${esc(p.ig)}</strong></div>` : ''}
+            <div class="reg-card-row full" style="word-break:break-all">📧 ${esc(p.email)}</div>
+          </div>
+          <div class="reg-card-footer">
+            <textarea class="note-ta" rows="1" placeholder="備註…"
+              data-key="${k}" onblur="adminSaveNote(this)" oninput="autoResize(this)">${esc(p.note)}</textarea>
+            <div class="chk-wrap">
+              <span>已確認</span>
+              <input type="checkbox" data-key="${k}" ${p.checked === true ? 'checked' : ''}
+                onchange="adminSaveChecked(this,${pi},${idx})">
+            </div>
+          </div>
+        </div>`;
+            });
+        }
+
+        return `
+    <div class="panel-top">
+      <span class="panel-title">${esc(s.label)}</span>
+      <div class="panel-badges">
+        <span class="badge badge-ok">正取 ${s.confirmed}</span>
+        ${s.waitlist>0?`<span class="badge badge-wait">候補 ${s.waitlist}</span>`:''}
+        <span class="badge ${stCls}">${stTxt}</span>
+      </div>
+    </div>
+    <div class="search-row">
+      <input type="text" class="search-input" placeholder="🔍 搜尋姓名、Email、IG…"
+        oninput="filterAdminCards(this,${pi})">
+    </div>
+    <div class="reg-cards" id="acards-${pi}">${cards}</div>
+    <div class="pad-bottom"></div>`;
+    }
+
+    function switchAdminTab(i) {
+        adminTabIdx = i;
+        document.querySelectorAll('.sum-card').forEach((c,j)    => c.classList.toggle('active',j===i));
+        document.querySelectorAll('.admin-tab').forEach((t,j)   => t.classList.toggle('active',j===i));
+        document.querySelectorAll('.admin-panel').forEach((p,j) => p.classList.toggle('active',j===i));
+    }
+
+    function filterAdminCards(inp, pi) {
+        const q = inp.value.toLowerCase();
+        document.querySelectorAll(`#acards-${pi} .reg-card`).forEach(card => {
+            card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+
+    const noteTimers = {}; // ⭐ 關鍵
+
+    function adminSaveNote(ta) {
+        const key  = ta.dataset.key;
+        const note = ta.value;
+
+        // 👉 只取消「這個 key」的 timer
+        if (noteTimers[key]) {
+            clearTimeout(noteTimers[key]);
+        }
+
+        noteTimers[key] = setTimeout(() => {
+            callAPIPost('saveNote', { key, note })
+                .then(() => {
+                    console.log('✅ 備註已儲存', key);
+                    // 👉 不要每次都 showToast（會洗畫面）
+                    // ⭐ 新增這行（關鍵）
+                    ta.dataset.saved = note;
+                })
+                .catch(() => {
+                    showToast('❌ 儲存失敗');
+
+                    // ⭐ rollback（避免 UI 假成功）
+                    if (ta.dataset.saved !== undefined) {
+                        ta.value = ta.dataset.saved;
+                    }
+                });
+        }, 600);
+    }
+
+    function adminSaveChecked(cb, pi, idx) {
+        const key = cb.dataset.key, checked = cb.checked;
+        const card = document.getElementById('arow-' + pi + '-' + idx);
+        card.classList.toggle('done-card', checked);
+        card.classList.toggle('wait-card', !checked && adminData?.sessions?.[adminTabIdx]?.registrants?.[idx]?.waitlist);
+
+        callAPIPost('saveChecked', { key, checked })
+            .then(() => showToast(checked ? '✅ 已確認' : '↩️ 已取消確認'))
+            .catch(() => showToast('❌ 儲存失敗'));
+    }
+
+    function rebuildStats() {
+        const btn = document.getElementById('btn-rebuild');
+        btn.disabled = true; btn.textContent = '⏳ 同步中…';
+
+        const statusUpdates = [];
+        document.querySelectorAll('input[type="checkbox"][data-key]').forEach(cb => {
+            statusUpdates.push({ key: cb.getAttribute('data-key'), checked: cb.checked });
+        });
+
+        // ✅ 加這行確認
+        console.log('statusUpdates 型態:', typeof statusUpdates, Array.isArray(statusUpdates));
+        console.log('statusUpdates 內容:', JSON.stringify(statusUpdates));
+
+        if (!statusUpdates.length) {
+            showToast('⚠️ 找不到任何 Checkbox');
+            btn.disabled = false; btn.textContent = '📊 更新統計';
+            return;
+        }
+
+        callAPIPost('saveAndRebuild', { statusUpdates })
+            .then(res => {
+                btn.disabled = false; btn.textContent = '📊 更新統計';
+                showToast(res.ok ? '✅ 同步成功！' : '❌ ' + (res.error || '未知錯誤'));
+            })
+            .catch(e => {
+                btn.disabled = false; btn.textContent = '📊 更新統計';
+                showToast('❌ ' + e.message);
+            });
+    }
+
+    // ── Helpers ──
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function escAttr(s) { return String(s||'').replace(/"/g,'&quot;'); }
+    function autoResize(ta) { ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; }
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2400);
+    }
+</script>
+</body>
+</html>
