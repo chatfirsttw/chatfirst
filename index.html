@@ -666,94 +666,32 @@
 
     // ── API 設定（GitHub Pages 版本）──
     // ✅ 請把下面這行換成你的 Apps Script 部署網址
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzRJ3ZgrJlz3pkSRlaPZvP5IL64evEAKd1mp-ZXASQ9sMbuATMicWhE6nvVTwbMUQTsRA/exec';
+    // const API_URL = 'https://script.google.com/macros/s/AKfycbzRJ3ZgrJlz3pkSRlaPZvP5IL64evEAKd1mp-ZXASQ9sMbuATMicWhE6nvVTwbMUQTsRA/exec';
+    const API_URL = 'https://chatfirst-proxy.chatfirst-tw.workers.dev/'
 
-    // ── 讀取用 JSONP（doGet）──
-    function callAPI(action, payload = {}) {
-        return new Promise((resolve, reject) => {
-            const cbName = '_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-            const timer = setTimeout(() => {
-                delete window[cbName];
-                document.getElementById(cbName)?.remove();
-                reject(new Error('請求逾時'));
-            }, 10000);
-            window[cbName] = (data) => {
-                clearTimeout(timer);
-                delete window[cbName];
-                document.getElementById(cbName)?.remove();
-                resolve(data);
-            };
-            const params = new URLSearchParams({
-                action:   action,
-                payload:  JSON.stringify(payload),
-                callback: cbName
-            });
-            const script = document.createElement('script');
-            script.id  = cbName;
-            script.src = `${API_URL}?${params}`;
-            script.onerror = () => {
-                clearTimeout(timer);
-                delete window[cbName];
-                script.remove();
-                reject(new Error('請求失敗'));
-            };
-            document.head.appendChild(script);
-        });
-    }
 
-    // ── 寫入/敏感操作用 doPost（no-cors，不讀回應）──
-    /*
-    async function callAPIPost(action, payload = {}) {
-    try {
-      await fetch(API_URL, {
+   // ✅ 統一用 fetch，不再需要 JSONP
+    async function callAPI(action, payload = {}) {
+      const res = await fetch(API_URL, {
         method:  'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body:    JSON.stringify({ action, payload }),
-        mode:    'no-cors'
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ action, payload })
       });
-      return { ok: true };
-    } catch(err) {
-      return { ok: false, error: err.message };
+      const text = await res.text();
+      return JSON.parse(text);
     }
-  }
-
-
-    function callAPIPost(action, payload = {}) {
-    return fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ action, payload })
-    })
-    .then(res => res.json());
-  }
-
-    */
-
-
-
+    
     async function callAPIPost(action, payload = {}) {
-        console.log('📡 callAPIPost 送出：', action);
-        try {
-            const res = await fetch(API_URL, {
-                method:  'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body:    JSON.stringify({ action, payload })
-            });
-            console.log('📡 HTTP status：', res.status);
-            if (!res.ok) throw new Error('網路回應異常 HTTP ' + res.status);
-            const text = await res.text();
-            console.log('📡 回應內容：', text);
-            const data = JSON.parse(text);
-            // ✅ 直接回傳 data，讓呼叫方自己判斷 ok/duplicate/error
-            return data;
-        } catch(err) {
-            console.error('📡 callAPIPost 失敗：', err.message);
-            throw err;
-        }
+      const res = await fetch(API_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ action, payload })
+      });
+      const text = await res.text();
+      return JSON.parse(text);
     }
 
+    
     // ── Router ──
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
