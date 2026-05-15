@@ -398,14 +398,14 @@
         <div class="landing-logo">🌿</div>
         <h1>先聊再說</h1>
         <div class="landing-cards">
-            <div class="landing-card" onclick="showPage('page-about')">
-                <div class="card-icon">✨</div>
-                <div><h3>活動介紹</h3><p>了解先聊再說是什麼活動</p></div>
+            <div class="landing-card" onclick="showPage('page-user')">
+                <div class="card-icon">📝</div>
+                <div><h3>報名</h3><p>立即報名活動場次</p></div>
             </div>
 
             <div class="landing-card" onclick="sessionStorage.setItem('defaultTab', 'query'); showPage('page-user')">
-                <div class="card-icon">📝</div>
-                <div><h3>查詢</h3><p>查詢報名狀態</p></div>
+                <div class="card-icon">🔍</div>
+                <div><h3>查詢</h3><p>查詢我的報名狀態</p></div>
             </div>
 
             <!-- 改後：預設隱藏，只有 #admin 才顯示 -->
@@ -414,84 +414,6 @@
                 <div><h3>管理者</h3><p>查看名單、備註、確認報名狀態</p></div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- ABOUT PAGE -->
-<div class="page" id="page-about">
-    <div class="app-header">
-        <button class="btn-back" onclick="showPage('page-landing')">← 返回</button>
-        <h2>✨ 活動介紹</h2>
-        <div style="width:60px"></div>
-    </div>
-
-    <div class="about-hero">
-        <div class="about-hero-icon">☕</div>
-        <h1>先聊再說</h1>
-        <p>不用完整的自我介紹，也不用急著定義關係。
-            沒有尷尬的破冰遊戲，沒有一定要留下聯絡方式的壓力。
-            我們只是剛好在固定的假日中午，
-            找一群人一起吃飯、聊天——
-            輕鬆地，剛剛好。
-        </p>
-        <p>
-            這裡會有一些主題，讓對話更容易開始：
-            星座、血型、MBTI，或是穿搭、髮型、生活習慣……
-            你可以從有共鳴的話題加入，也可以隨著聊天慢慢延伸到任何你想聊的事。
-
-            不只兩性，不只交友，
-            而是透過各種主題，認識不同的人、不同的想法。
-
-            你會在不同的小話題裡，慢慢認識幾個人——
-            也許只是交換想法，也許剛好聊得來。
-            至於之後會發生什麼，
-
-
-            先聊，再說。
-        </p>
-    </div>
-
-    <div class="about-section">
-
-        <div class="about-card">
-            <div class="about-card-title">📋 活動資訊</div>
-            <div class="about-info-row">
-                <span class="about-info-icon">💰</span>
-                <div class="about-info-text"><strong>費用</strong>每人 1,000 元（含餐）</div>
-            </div>
-            <div class="about-info-row">
-                <span class="about-info-icon">📍</span>
-                <div class="about-info-text">
-                    <strong>地點</strong>
-                    秘徑咖啡 Alley's cafe B1<br>
-                    <span style="color:var(--gray-400);font-size:13px">捷運萬隆站 1 號出口後方</span>
-                </div>
-            </div>
-            <div class="about-info-row">
-                <span class="about-info-icon">🗓️</span>
-                <div class="about-info-text"><strong>時間</strong>固定假日中午（詳見報名頁場次）</div>
-            </div>
-        </div>
-
-        <div class="about-card">
-            <div class="about-card-title">⚠️ 注意事項</div>
-            <div class="about-notice">
-                <p>📌 <strong>取消規定</strong><br>
-                    因故需臨時當日取消，可延場一次。<br>
-                    請告知欲延期之場次日期。</p>
-                <br>
-                <p>💳 <strong>退款規定</strong><br>
-                    活動當日前 3 日取消 → 退款 90%<br>
-                    當日取消 → 不退款</p>
-            </div>
-        </div>
-
-        <div class="about-cta">
-            <p>看起來不錯？立刻來報名吧！</p>
-            <button class="btn-cta" onclick="showPage('page-user')">我要報名 →</button>
-        </div>
-
-        <div class="pad-bottom"></div>
     </div>
 </div>
 
