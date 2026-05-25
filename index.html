@@ -328,6 +328,29 @@
         .hint{font-size:12px;color:var(--gray-400);line-height:1.6;margin-top:-6px;}
         .pad-bottom{height:max(24px,env(safe-area-inset-bottom));}
 
+        /* ── Identity ── */
+        .identity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+        .identity-opt{display:flex;flex-direction:column;align-items:center;text-align:center;padding:14px 8px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;user-select:none;}
+        .identity-opt.selected{border-color:var(--blue);background:var(--blue-light);}
+        .identity-opt.locked{opacity:.35;pointer-events:none;background:var(--gray-50);}
+        .identity-opt-icon{font-size:22px;margin-bottom:4px;}
+        .identity-opt-name{font-size:12px;font-weight:700;color:var(--gray-900);line-height:1.3;}
+        .identity-opt-price{font-size:13px;font-weight:800;color:var(--blue);margin-top:4px;}
+        .identity-notice{padding:10px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;margin-bottom:12px;background:var(--green-light);color:var(--green);}
+
+        /* ── Referral ── */
+        .referral-chips{display:flex;flex-wrap:wrap;gap:8px;}
+        .referral-chip{padding:8px 16px;border:1.5px solid var(--gray-200);border-radius:var(--radius-full);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;user-select:none;background:white;}
+        .referral-chip.selected{border-color:var(--blue);background:var(--blue-light);color:var(--blue);}
+        .referral-chip:active{transform:scale(.97);}
+
+        /* ── Social Links ── */
+        .social-section{text-align:center;padding:20px 0 4px;}
+        .social-label{font-size:12px;color:var(--gray-400);font-weight:700;margin-bottom:12px;letter-spacing:.5px;}
+        .social-links{display:flex;justify-content:center;gap:28px;}
+        .social-link{display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;color:var(--gray-500);font-size:11px;font-weight:700;}
+        .social-link-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:white;box-shadow:var(--shadow);}
+
         /* ── About Page ── */
         .about-hero{background:linear-gradient(160deg,#1a3a6b 0%,#2563eb 100%);padding:40px 20px 32px;text-align:center;}
         .about-hero-icon{font-size:52px;margin-bottom:12px;}
@@ -444,7 +467,28 @@
                     <div class="field"><label>IG 帳號<span class="req">*</span></label>
 
                         <input id="f-ig" type="text" placeholder="@username" autocomplete="off"></div>
-                    <div class="field"><label>個人 E-Mail<span class="req">*</span></label><input id="f-email" type="email" inputmode="email" placeholder="example@gmail.com" autocomplete="email"></div>
+                    <div class="field"><label>個人 E-Mail<span class="req">*</span></label><input id="f-email" type="email" inputmode="email" placeholder="example@gmail.com" autocomplete="email" onblur="scheduleIdentityCheck()"></div>
+                </div>
+                <div class="form-card">
+                    <h3>活動身份<span class="req">*</span></h3>
+                    <div class="identity-notice" id="identity-notice" style="display:none;">✅ 偵測到您曾報名過，已為您切換為舊生</div>
+                    <div class="identity-grid">
+                        <div class="identity-opt selected" id="iopt-new" onclick="selectIdentity('新生體驗',this)">
+                            <div class="identity-opt-icon">🌱</div>
+                            <div class="identity-opt-name">新生體驗</div>
+                            <div class="identity-opt-price">NT$ 1,500</div>
+                        </div>
+                        <div class="identity-opt" id="iopt-old-single" onclick="selectIdentity('舊生單堂',this)">
+                            <div class="identity-opt-icon">⭐</div>
+                            <div class="identity-opt-name">舊生單堂</div>
+                            <div class="identity-opt-price">NT$ 1,350</div>
+                        </div>
+                        <div class="identity-opt" id="iopt-old-bundle" onclick="selectIdentity('舊生6堂',this)">
+                            <div class="identity-opt-icon">🎯</div>
+                            <div class="identity-opt-name">舊生 6 堂</div>
+                            <div class="identity-opt-price">NT$ 8,100</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-card">
                     <h3>報名場次<span class="req">*</span></h3>
@@ -457,17 +501,48 @@
                         <div style="font-size:12px;color:var(--gray-500);margin-bottom:4px;font-weight:700;">匯款帳號</div>
                         <div style="font-size:15px;font-weight:800;color:var(--gray-900);letter-spacing:1px;">（812）台新銀行</div>
                         <div style="font-size:18px;font-weight:800;color:var(--blue);letter-spacing:2px;margin-top:4px;">28881020086812</div>
+                        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--blue-border);">
+                            <div style="font-size:12px;color:var(--gray-500);font-weight:700;">應付金額</div>
+                            <div style="font-size:22px;font-weight:800;color:var(--blue);margin-top:2px;" id="payment-price">NT$ 1,500</div>
+                        </div>
                     </div>
                     <div>
                         <!-- 新增這行 -->
                         <p style="font-size:13px;color:#dc2626;font-weight:700;margin-top:6px;">⚠️ 請於報名後 2 日內完成匯款，逾時將取消報名資格</p>
                     </div>
                     <div class="field"><label>匯款後五碼<span class="req">*</span></label>
-                        <input id="f-pay" type="text" inputmode="numeric" maxlength="5" placeholder="例：86123">
+                        <input id="f-pay" type="text" inputmode="numeric" maxlength="5" placeholder="例：86123" oninput="scheduleIdentityCheck()">
                     </div>
                     <p class="hint">※ 請填入您匯款帳戶的後五碼供核對，非收款帳號後五碼</p>
                 </div>
+                <div class="form-card">
+                    <h3>從何得知</h3>
+                    <div class="field">
+                        <div class="referral-chips">
+                            <div class="referral-chip" onclick="selectReferral('FB',this)">FB</div>
+                            <div class="referral-chip" onclick="selectReferral('IG',this)">IG</div>
+                            <div class="referral-chip" onclick="selectReferral('朋友介紹',this)">朋友介紹</div>
+                            <div class="referral-chip" onclick="selectReferral('其他',this)">其他</div>
+                        </div>
+                        <input id="f-referral-other" type="text" placeholder="請說明從何得知"
+                               style="display:none;margin-top:10px;width:100%;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:16px;outline:none;font-family:var(--font);">
+                    </div>
+                </div>
                 <button class="btn-submit" id="btn-submit" onclick="submitForm()">確認送出報名 →</button>
+                <div class="social-section">
+                    <div class="social-label">追蹤我們</div>
+                    <div class="social-links">
+                        <a href="#" class="social-link" id="link-fb">
+                            <div class="social-link-icon">📘</div>Facebook https://www.facebook.com/share/18qxX5Dz6W/?mibextid=wwXIfr
+                        </a>
+                        <a href="#" class="social-link" id="link-ig">
+                            <div class="social-link-icon">📸</div>Instagram https://www.instagram.com/chatfirst.tw?igsh=c2RxM201YWlhbW5t&utm_source=qr
+                        </a>
+                        <a href="#" class="social-link" id="link-threads">
+                            <div class="social-link-icon">🧵</div>Threads https://www.threads.com/@chatfirst.tw?igshid=NTc4MTIwNjQ2YQ==
+                        </a>
+                    </div>
+                </div>
                 <div class="pad-bottom"></div>
             </div>
         </div>
@@ -715,6 +790,10 @@
         if (!/^[a-zA-Z0-9._]{1,30}$/.test(igClean)) { showToast('⚠️ IG 格式錯誤'); return; }
         if (!pay) { showToast('⚠️ 請填寫匯款後五碼'); return; }
         if (!/^\d{5}$/.test(pay)) { showToast('⚠️ 後五碼必須是 5 位數字'); return; }
+        const identity = currentIdentity;
+        if (!identity) { showToast('⚠️ 請選擇活動身份'); return; }
+        const referralOther = document.getElementById('f-referral-other').value.trim();
+        const referral = selectedReferral === '其他' ? (referralOther || '其他') : selectedReferral;
 
         // 3. UI 鎖定
         const btn = document.getElementById('btn-submit');
@@ -729,7 +808,7 @@
         while (attempts < maxAttempts) {
             try {
                 submitRes = await callAPIPost('submitRegistration', {
-                    name, gender, age, ig, email, pay, sessions
+                    name, gender, age, ig, email, pay, sessions, identity, referral
                 });
 
                 // 如果成功或是業務邏輯錯誤 (重複、額滿)，就跳出迴圈
@@ -789,10 +868,10 @@
             resetSubmitBtn(btn);
 
             if (res.found) {
-                showRegSuccess({ name, sessions, email });
+                showRegSuccess({ name, sessions, email, identity });
             } else {
                 // 雖然查不到，但既然 submitRes.ok 為真，仍顯示成功畫面
-                showRegSuccess({ name, sessions, email });
+                showRegSuccess({ name, sessions, email, identity });
                 // 背景靜默再次更新
                 setTimeout(async () => {
                     await callAPI('queryMyRegistration', { email });
@@ -832,7 +911,7 @@
         document.getElementById('reg-success-view').style.display = 'block';
         document.getElementById('reg-dup-view').style.display     = 'none';
         document.getElementById('reg-success-detail').innerHTML   =
-            `<li>👤 姓名：${esc(data.name)}</li><li>🗓️ 場次：${data.sessions.map(s=>esc(s)).join('、')}</li><li>📧 確認信：${esc(data.email)}</li>`;
+            `<li>👤 姓名：${esc(data.name)}</li><li>🎫 身份：${esc(data.identity||'')}</li><li>🗓️ 場次：${data.sessions.map(s=>esc(s)).join('、')}</li><li>📧 確認信：${esc(data.email)}</li>`;
     }
     function showRegDuplicate(dups) {
         document.getElementById('reg-form-view').style.display    = 'none';
@@ -850,6 +929,17 @@
         document.getElementById('f-gender').value = '';
         document.getElementById('f-age').value    = '';
         document.querySelectorAll('#sessions-grid input').forEach(cb => { cb.checked = false; cb.closest('.session-check').classList.remove('selected'); });
+        // reset identity
+        document.querySelectorAll('.identity-opt').forEach(o => o.classList.remove('selected','locked'));
+        document.getElementById('iopt-new').classList.add('selected');
+        document.getElementById('identity-notice').style.display = 'none';
+        identityLocked = false; currentIdentity = '新生體驗';
+        document.getElementById('payment-price').textContent = 'NT$ 1,500';
+        // reset referral
+        selectedReferral = '';
+        document.querySelectorAll('.referral-chip').forEach(c => c.classList.remove('selected'));
+        document.getElementById('f-referral-other').style.display = 'none';
+        document.getElementById('f-referral-other').value = '';
         showRegForm(); availSessions = []; loadSessions();
     }
 
@@ -998,9 +1088,11 @@
           </div>
           <div class="reg-card-body">
             <div class="reg-card-row">👤 ${esc(p.gender)} · ${esc(String(p.age))}歲</div>
+            ${p.identity ? `<div class="reg-card-row">🎫 <strong>${esc(p.identity)}</strong></div>` : ''}
             ${p.pay ? `<div class="reg-card-row">💳 <strong>${esc(p.pay)}</strong></div>` : '<div></div>'}
             ${p.ig  ? `<div class="reg-card-row full">📸 <strong>${esc(p.ig)}</strong></div>` : ''}
             <div class="reg-card-row full" style="word-break:break-all">📧 ${esc(p.email)}</div>
+            ${p.referral ? `<div class="reg-card-row">📣 ${esc(p.referral)}</div>` : ''}
           </div>
           <div class="reg-card-footer">
             <textarea class="note-ta" rows="1" placeholder="備註…"
@@ -1044,6 +1136,77 @@
         document.querySelectorAll(`#acards-${pi} .reg-card`).forEach(card => {
             card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
         });
+    }
+
+    // ── Identity & Referral state ──
+    let identityLocked = false;
+    let currentIdentity = '新生體驗';
+    let selectedReferral = '';
+
+    const IDENTITY_PRICES = { '新生體驗': 'NT$ 1,500', '舊生單堂': 'NT$ 1,350', '舊生6堂': 'NT$ 8,100' };
+
+    function selectIdentity(value, el) {
+        if (el.classList.contains('locked')) return;
+        document.querySelectorAll('.identity-opt').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        currentIdentity = value;
+        const priceEl = document.getElementById('payment-price');
+        if (priceEl) priceEl.textContent = IDENTITY_PRICES[value] || 'NT$ 1,500';
+    }
+
+    let identityCheckTimer = null;
+    function scheduleIdentityCheck() {
+        clearTimeout(identityCheckTimer);
+        identityCheckTimer = setTimeout(runIdentityCheck, 600);
+    }
+
+    async function runIdentityCheck() {
+        const email = document.getElementById('f-email').value.trim();
+        const pay   = document.getElementById('f-pay').value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || pay.length !== 5) {
+            if (identityLocked) resetIdentityLock();
+            return;
+        }
+        try {
+            const res = await callAPI('checkIdentity', { email, pay });
+            lockIdentity(res.isReturning === true);
+        } catch(e) { /* API 失敗時不鎖定 */ }
+    }
+
+    function lockIdentity(isReturning) {
+        identityLocked = true;
+        const notice = document.getElementById('identity-notice');
+        if (isReturning) {
+            document.getElementById('iopt-new').classList.add('locked');
+            document.getElementById('iopt-old-single').classList.remove('locked');
+            document.getElementById('iopt-old-bundle').classList.remove('locked');
+            selectIdentity('舊生單堂', document.getElementById('iopt-old-single'));
+            notice.style.display = 'block';
+            showToast('✅ 偵測到您是舊生，已自動切換');
+        } else {
+            document.getElementById('iopt-new').classList.remove('locked');
+            document.getElementById('iopt-old-single').classList.add('locked');
+            document.getElementById('iopt-old-bundle').classList.add('locked');
+            selectIdentity('新生體驗', document.getElementById('iopt-new'));
+            notice.style.display = 'none';
+        }
+    }
+
+    function resetIdentityLock() {
+        identityLocked = false;
+        ['iopt-new','iopt-old-single','iopt-old-bundle'].forEach(id => {
+            document.getElementById(id)?.classList.remove('locked');
+        });
+        document.getElementById('identity-notice').style.display = 'none';
+    }
+
+    function selectReferral(value, el) {
+        selectedReferral = value;
+        document.querySelectorAll('.referral-chip').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        const other = document.getElementById('f-referral-other');
+        other.style.display = value === '其他' ? 'block' : 'none';
+        if (value !== '其他') other.value = '';
     }
 
     const noteTimers = {}; // ⭐ 關鍵
