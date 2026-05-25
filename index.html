@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>報名系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
         :root{
@@ -350,8 +351,11 @@
         .social-links{display:flex;justify-content:center;gap:32px;}
         .social-link{display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:var(--gray-500);font-size:13px;font-weight:700;transition:color .15s;}
         .social-link:hover{color:var(--blue);}
-        .social-link-icon{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;background:white;box-shadow:var(--shadow-md);transition:transform .15s;}
+        .social-link-icon{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;background:white;box-shadow:var(--shadow-md);transition:transform .15s;}
         .social-link:hover .social-link-icon{transform:translateY(-3px);}
+        .fa-facebook{color:#1877F2;}
+        .fa-instagram{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+        .fa-threads{color:#000;}
 
         /* ── About Page ── */
         .about-hero{background:linear-gradient(160deg,#1a3a6b 0%,#2563eb 100%);padding:40px 20px 32px;text-align:center;}
@@ -535,13 +539,13 @@
                     <div class="social-label">追蹤我們</div>
                     <div class="social-links">
                         <a href="https://www.facebook.com/share/18qxX5Dz6W/?mibextid=wwXIfr" target="_blank" class="social-link" id="link-fb">
-                            <div class="social-link-icon">📘</div>Facebook
+                            <div class="social-link-icon"><i class="fa-brands fa-facebook"></i></div>Facebook
                         </a>
-                        <a href="https://www.instagram.com/chatfirst.tw?igsh=c2RxM201YWlhbW5t&utm_source=qr" class="social-link" id="link-ig">
-                            <div class="social-link-icon">📸</div>Instagram
+                        <a href="https://www.instagram.com/chatfirst.tw?igsh=c2RxM201YWlhbW5t&utm_source=qr" target="_blank" class="social-link" id="link-ig">
+                            <div class="social-link-icon"><i class="fa-brands fa-instagram"></i></div>Instagram
                         </a>
-                        <a href="https://www.threads.com/@chatfirst.tw?igshid=NTc4MTIwNjQ2YQ==" class="social-link" id="link-threads">
-                            <div class="social-link-icon">🧵</div>Threads
+                        <a href="https://www.threads.com/@chatfirst.tw?igshid=NTc4MTIwNjQ2YQ==" target="_blank" class="social-link" id="link-threads">
+                            <div class="social-link-icon"><i class="fa-brands fa-threads"></i></div>Threads
                         </a>
                     </div>
                 </div>
