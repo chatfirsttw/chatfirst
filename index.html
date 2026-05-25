@@ -173,7 +173,7 @@
         .field{margin-bottom:16px;}
 
         .field label{display:block;font-size:14px;font-weight:700;color:var(--gray-700);margin-bottom:8px;letter-spacing:.3px;}
-        .field label .req{color:var(--red);margin-left:2px;}
+        .field label .req,.req{color:var(--red);margin-left:2px;}
         .field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:16px;color:var(--gray-900);outline:none;transition:border-color .15s;background:white;-webkit-appearance:none;font-family:var(--font);}
         .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
         .field input::placeholder{color:var(--gray-200);}
@@ -613,6 +613,7 @@
         <span class="updated-at" id="admin-updated">—</span>
         <div class="admin-btns">
             <button class="btn-sm btn-rebuild" id="btn-rebuild" onclick="rebuildStats()">📊 更新統計</button>
+            <button class="btn-sm btn-refresh-sm" id="btn-archive" onclick="archiveVeteransFromAdmin()">📚 歸檔舊生</button>
             <button class="btn-sm btn-refresh-sm" id="btn-refresh" onclick="loadAdminData()">🔄 重整</button>
         </div>
     </div>
@@ -1279,6 +1280,20 @@ if (!pay) { showToast('⚠️ 請填寫匯款後五碼'); return; }
                 btn.disabled = false; btn.textContent = '📊 更新統計';
                 showToast('❌ ' + e.message);
             });
+    }
+
+    // B｜Admin bar 手動歸檔舊生名冊
+    async function archiveVeteransFromAdmin() {
+        const btn = document.getElementById('btn-archive');
+        btn.disabled = true; btn.textContent = '⏳ 歸檔中…';
+        try {
+            const res = await callAPIPost('archiveVeterans', {});
+            showToast(res.ok ? `✅ 歸檔完成，新增 ${res.added} 位舊生` : '❌ ' + (res.error || '歸檔失敗'));
+        } catch(e) {
+            showToast('❌ ' + e.message);
+        } finally {
+            btn.disabled = false; btn.textContent = '📚 歸檔舊生';
+        }
     }
 
     // ── Helpers ──
