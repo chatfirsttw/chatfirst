@@ -464,16 +464,12 @@
             <div class="form-wrap">
                 <div class="form-card">
                     <h3>個人資料</h3>
-                    <div class="field"><label>姓名<span class="req">*</span></label><input id="f-name" type="text" placeholder="請輸入姓名" autocomplete="name"></div>
+                    <div class="field"><label>中文姓名<span class="req">*</span></label><input id="f-name" type="text" placeholder="請輸入中文姓名" autocomplete="name"></div>
                     <div class="field"><label>性別<span class="req">*</span></label>
                         <div class="select-wrap"><select id="f-gender"><option value="">請選擇</option><option>男</option><option>女</option><option>其他</option></select></div>
                     </div>
                     <div class="field"><label>年紀<span class="req">*</span></label><input id="f-age" type="number" inputmode="numeric" min="1" max="120" placeholder="例：25"></div>
-                    <!-- 改後 -->
-                    <div class="field"><label>IG 帳號<span class="req">*</span></label>
-
-                        <input id="f-ig" type="text" placeholder="@username" autocomplete="off"></div>
-                    <div class="field"><label>個人 E-Mail<span class="req">*</span></label><input id="f-email" type="email" inputmode="email" placeholder="example@gmail.com" autocomplete="email" onblur="scheduleIdentityCheck()"></div>
+                    <div class="field"><label>個人 E-Mail（寄發報名資訊用）<span class="req">*</span></label><input id="f-email" type="email" inputmode="email" placeholder="example@gmail.com" autocomplete="email" onblur="scheduleIdentityCheck()"></div>
                 </div>
                 <div class="form-card">
                     <h3>活動身份<span class="req">*</span></h3>
@@ -522,7 +518,7 @@
                     <p class="hint">※ 請填入您匯款帳戶的後五碼供核對，非收款帳號後五碼</p>
                 </div>
                 <div class="form-card">
-                    <h3>從何得知</h3>
+                    <h3>從何得知本活動?</h3>
                     <div class="field">
                         <div class="referral-chips">
                             <div class="referral-chip" onclick="selectReferral('FB',this)">FB</div>
@@ -775,7 +771,7 @@
         const name = document.getElementById('f-name').value.trim();
         const gender = document.getElementById('f-gender').value;
         const age = document.getElementById('f-age').value.trim();
-        const ig = document.getElementById('f-ig').value.trim();
+        const ig = '';
         const email = document.getElementById('f-email').value.trim();
         const pay = document.getElementById('f-pay').value.trim();
         const sessions = getSelectedSessions();
@@ -791,10 +787,7 @@
         if (!email) { showToast('⚠️ 請填寫 Email'); return; }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('⚠️ Email 格式不正確'); return; }
         if (!sessions.length) { showToast('⚠️ 請選擇至少一個場次'); return; }
-        if (!ig) { showToast('⚠️ 請填寫 IG 帳號'); return; }
-        const igClean = ig.startsWith('@') ? ig.slice(1) : ig;
-        if (!/^[a-zA-Z0-9._]{1,30}$/.test(igClean)) { showToast('⚠️ IG 格式錯誤'); return; }
-        if (!pay) { showToast('⚠️ 請填寫匯款後五碼'); return; }
+if (!pay) { showToast('⚠️ 請填寫匯款後五碼'); return; }
         if (!/^\d{5}$/.test(pay)) { showToast('⚠️ 後五碼必須是 5 位數字'); return; }
         const identity = currentIdentity;
         if (!identity) { showToast('⚠️ 請選擇活動身份'); return; }
@@ -931,7 +924,7 @@
         document.getElementById('reg-dup-view').style.display     = 'none';
     }
     function resetForm() {
-        ['f-name','f-ig','f-email','f-pay'].forEach(id => document.getElementById(id).value = '');
+        ['f-name','f-email','f-pay'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('f-gender').value = '';
         document.getElementById('f-age').value    = '';
         document.querySelectorAll('#sessions-grid input').forEach(cb => { cb.checked = false; cb.closest('.session-check').classList.remove('selected'); });
