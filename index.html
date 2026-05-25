@@ -518,7 +518,7 @@
                     <p class="hint">※ 請填入您匯款帳戶的後五碼供核對，非收款帳號後五碼</p>
                 </div>
                 <div class="form-card">
-                    <h3>從何得知本活動?</h3>
+                    <h3>從何得知本活動？<span class="req">*</span></h3>
                     <div class="field">
                         <div class="referral-chips">
                             <div class="referral-chip" onclick="selectReferral('FB',this)">FB</div>
@@ -793,6 +793,8 @@ if (!pay) { showToast('⚠️ 請填寫匯款後五碼'); return; }
         if (!identity) { showToast('⚠️ 請選擇活動身份'); return; }
         const referralOther = document.getElementById('f-referral-other').value.trim();
         const referral = selectedReferral === '其他' ? (referralOther || '其他') : selectedReferral;
+        if (!selectedReferral) { showToast('⚠️ 請選擇從何得知本活動'); return; }
+        if (selectedReferral === '其他' && !referralOther) { showToast('⚠️ 請填寫從何得知的說明'); return; }
 
         // 3. UI 鎖定
         const btn = document.getElementById('btn-submit');
