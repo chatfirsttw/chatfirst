@@ -740,7 +740,7 @@
         return [...document.querySelectorAll('#sessions-grid input[type=checkbox]:checked')].map(cb => cb.value);
     }
 
-    const PRICE_PER_SESSION = 450;
+    const PRICE_PER_SESSION = 250;
 
     function updatePaymentPrice() {
         const total = getSelectedSessions().length * PRICE_PER_SESSION;
