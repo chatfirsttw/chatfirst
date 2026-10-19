@@ -530,7 +530,11 @@
                     <div id="ref-code-text" style="font-size:28px;font-weight:800;color:var(--blue);letter-spacing:4px;margin:4px 0;"></div>
                     <button class="btn-again" style="margin-top:6px;" onclick="copyRefCode()" id="btn-copy-code">複製代碼</button>
                     <div style="font-size:13px;color:var(--gray-700);margin-top:10px;line-height:1.6;">請加入官方 LINE，並依序完成：① 傳送這組代碼　② 匯款後傳送「匯款帳戶的後五碼」（只要 5 位數字，例如 09876）。</div>
-                    <a id="line-add-btn" href="#" target="_blank" rel="noopener" style="display:none;margin-top:10px;padding:12px 24px;background:#06C755;color:white;border-radius:var(--radius-sm);font-weight:700;text-decoration:none;">加入官方 LINE</a>
+                    <a id="line-add-btn" href="#" target="_blank" rel="noopener" style="display:none;margin-top:10px;padding:12px 24px;background:#06C755;color:white;border-radius:var(--radius-sm);font-weight:700;text-decoration:none;">加入官方 LINE 並傳送代碼</a>
+                    <div id="line-qr-wrap" style="display:none;margin-top:14px;">
+                        <div id="line-qr" style="display:inline-block;padding:8px;background:white;border-radius:8px;"></div>
+                        <div style="font-size:12px;color:var(--gray-500);margin-top:6px;">用電腦報名？請用手機掃描此 QR Code，訊息欄會自動帶入代碼</div>
+                    </div>
                 </div>
                 <ul class="result-list" id="reg-success-detail"></ul>
                 <button class="btn-again" onclick="resetForm()">繼續報名其他場次</button>
@@ -604,6 +608,8 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
 
@@ -904,10 +910,21 @@
             document.getElementById('ref-code-text').textContent = data.refCode;
             const btn = document.getElementById('line-add-btn');
             if (data.lineUrl) { btn.href = data.lineUrl; btn.style.display = 'inline-block'; } else { btn.style.display = 'none'; }
+            renderLineQr(data.lineUrl);
             box.style.display = 'block';
         } else {
             box.style.display = 'none';
         }
+    }
+    // 電腦報名者需要用手機掃 QR code；手機使用者直接點按鈕即可，不顯示
+    function renderLineQr(url) {
+        const wrap = document.getElementById('line-qr-wrap');
+        const box  = document.getElementById('line-qr');
+        box.innerHTML = '';
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (!url || isMobile || typeof QRCode === 'undefined') { wrap.style.display = 'none'; return; }
+        new QRCode(box, { text: url, width: 160, height: 160 });
+        wrap.style.display = 'block';
     }
     function copyRefCode() {
         const code = document.getElementById('ref-code-text').textContent;
