@@ -785,6 +785,8 @@
         btn.disabled = true;
         btn.textContent = '⏳ 送出中…';
 
+        // 同一次按下送出的所有重試共用同一個編號，後端據此避免重複寫入
+        const requestId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(16).slice(2));
         let attempts = 0;
         const maxAttempts = 5;
         let submitRes = null;
@@ -793,7 +795,7 @@
         while (attempts < maxAttempts) {
             try {
                 submitRes = await callAPIPost('submitRegistration', {
-                    name, gender, age, ig, threads, email, sessions, referral
+                    name, gender, age, ig, threads, email, sessions, referral, requestId
                 });
 
                 // 如果成功或是業務邏輯錯誤 (重複、額滿)，就跳出迴圈
