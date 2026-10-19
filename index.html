@@ -486,10 +486,7 @@
                         <!-- 新增這行 -->
                         <p style="font-size:13px;color:#dc2626;font-weight:700;margin-top:6px;">⚠️ 請於報名後 2 日內完成匯款，逾時將取消報名資格</p>
                     </div>
-                    <div class="field"><label>匯款後五碼<span class="req">*</span></label>
-                        <input id="f-pay" type="text" inputmode="numeric" maxlength="5" placeholder="例：86123">
-                    </div>
-                    <p class="hint">※ 請填入您匯款帳戶的後五碼供核對，非收款帳號後五碼</p>
+                    <p class="hint" style="font-weight:700;color:var(--gray-700);">※ 匯款後請到官方 LINE 傳送「您匯款帳戶的後五碼」供核對（非收款帳號後五碼）。報名成功後會提供報名代碼與加入連結。</p>
                 </div>
                 <div class="form-card">
                     <h3>從何得知本活動？<span class="req">*</span></h3>
@@ -527,12 +524,12 @@
             <div class="result-card">
                 <div class="result-icon">🎉</div>
                 <div class="result-title">報名成功！</div>
-                <div class="result-desc">確認信已寄至您的信箱<br>請記得完成匯款</div>
+                <div class="result-desc">確認信已寄至您的信箱<br>請記得完成匯款，並到官方 LINE 回報匯款後五碼</div>
                 <div id="ref-code-box" style="display:none;background:var(--blue-light);border:1.5px solid var(--blue-border);border-radius:var(--radius-sm);padding:14px;margin:14px 0;">
                     <div style="font-size:12px;color:var(--gray-500);font-weight:700;">您的報名代碼</div>
                     <div id="ref-code-text" style="font-size:28px;font-weight:800;color:var(--blue);letter-spacing:4px;margin:4px 0;"></div>
                     <button class="btn-again" style="margin-top:6px;" onclick="copyRefCode()" id="btn-copy-code">複製代碼</button>
-                    <div style="font-size:13px;color:var(--gray-700);margin-top:10px;line-height:1.6;">請加入官方 LINE，並把這組代碼傳給我們，方便後續聯繫與回報匯款資訊。</div>
+                    <div style="font-size:13px;color:var(--gray-700);margin-top:10px;line-height:1.6;">請加入官方 LINE 並傳送這組代碼完成綁定，匯款後再於 LINE 傳送「匯款帳戶的後五碼」。</div>
                     <a id="line-add-btn" href="#" target="_blank" rel="noopener" style="display:none;margin-top:10px;padding:12px 24px;background:#06C755;color:white;border-radius:var(--radius-sm);font-weight:700;text-decoration:none;">加入官方 LINE</a>
                 </div>
                 <ul class="result-list" id="reg-success-detail"></ul>
@@ -718,6 +715,7 @@
                 document.getElementById('sessions-grid').style.display    = 'flex';
                 if (!res.ok || !res.sessions) { document.getElementById('sessions-grid').innerHTML = '<p style="color:var(--gray-400);font-size:13px">暫無可報名場次</p>'; return; }
                 availSessions = res.sessions;
+                if (res.pricePerSession) PRICE_PER_SESSION = res.pricePerSession;
                 renderSessionCheckboxes(res.sessions);
             })
             .catch(() => { document.getElementById('sessions-loading').style.display = 'none'; });
@@ -749,7 +747,7 @@
         return [...document.querySelectorAll('#sessions-grid input[type=checkbox]:checked')].map(cb => cb.value);
     }
 
-    const PRICE_PER_SESSION = 250;
+    let PRICE_PER_SESSION = 250;
 
     function updatePaymentPrice() {
         const total = getSelectedSessions().length * PRICE_PER_SESSION;
@@ -764,7 +762,6 @@
         const ig = document.getElementById('f-ig').value.trim();
         const threads = document.getElementById('f-threads').value.trim();
         const email = document.getElementById('f-email').value.trim();
-        const pay = document.getElementById('f-pay').value.trim();
         const sessions = getSelectedSessions();
 
         // 2. 基本驗證 (你原本的邏輯)
@@ -778,8 +775,6 @@
         if (!email) { showToast('⚠️ 請填寫 Email'); return; }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('⚠️ Email 格式不正確'); return; }
         if (!sessions.length) { showToast('⚠️ 請選擇至少一個場次'); return; }
-if (!pay) { showToast('⚠️ 請填寫匯款後五碼'); return; }
-        if (!/^\d{5}$/.test(pay)) { showToast('⚠️ 後五碼必須是 5 位數字'); return; }
         const referralOther = document.getElementById('f-referral-other').value.trim();
         const referral = selectedReferral === '其他' ? (referralOther || '其他') : selectedReferral;
         if (!selectedReferral) { showToast('⚠️ 請選擇從何得知本活動'); return; }
@@ -798,7 +793,7 @@ if (!pay) { showToast('⚠️ 請填寫匯款後五碼'); return; }
         while (attempts < maxAttempts) {
             try {
                 submitRes = await callAPIPost('submitRegistration', {
-                    name, gender, age, ig, threads, email, pay, sessions, referral
+                    name, gender, age, ig, threads, email, sessions, referral
                 });
 
                 // 如果成功或是業務邏輯錯誤 (重複、額滿)，就跳出迴圈
@@ -931,7 +926,7 @@ if (!pay) { showToast('⚠️ 請填寫匯款後五碼'); return; }
         document.getElementById('reg-dup-view').style.display     = 'none';
     }
     function resetForm() {
-        ['f-name','f-email','f-pay','f-ig','f-threads'].forEach(id => document.getElementById(id).value = '');
+        ['f-name','f-email','f-ig','f-threads'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('f-gender').value = '';
         document.getElementById('f-age').value    = '';
         document.querySelectorAll('#sessions-grid input').forEach(cb => { cb.checked = false; cb.closest('.session-check').classList.remove('selected'); });
@@ -1089,7 +1084,8 @@ if (!pay) { showToast('⚠️ 請填寫匯款後五碼'); return; }
           <div class="reg-card-body">
             <div class="reg-card-row">👤 ${esc(p.gender)} · ${esc(String(p.age))}歲</div>
             ${p.identity ? `<div class="reg-card-row">🎫 <strong>${esc(p.identity)}</strong></div>` : ''}
-            ${p.pay ? `<div class="reg-card-row">💳 <strong>${esc(p.pay)}</strong></div>` : '<div></div>'}
+            <div class="reg-card-row">💳 ${p.pay ? `<strong>${esc(p.pay)}</strong>` : '<span style="color:var(--red)">後五碼未回報</span>'}</div>
+            <div class="reg-card-row">${p.lineBound ? '💬 LINE 已綁定' : '<span style="color:var(--red)">💬 LINE 未綁定</span>'}</div>
             ${p.ig  ? `<div class="reg-card-row full">📸 <strong>${esc(p.ig)}</strong></div>` : ''}
             ${p.threads ? `<div class="reg-card-row full">🧵 <strong>${esc(p.threads)}</strong></div>` : ''}
             <div class="reg-card-row full" style="word-break:break-all">📧 ${esc(p.email)}</div>
