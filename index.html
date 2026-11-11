@@ -1115,7 +1115,7 @@
             <div class="reg-card-row">👤 ${esc(p.gender)} · ${esc(String(p.age))}歲</div>
             ${p.identity ? `<div class="reg-card-row">🎫 <strong>${esc(p.identity)}</strong></div>` : ''}
             <div class="reg-card-row">💳 ${p.pay ? `<strong>${esc(p.pay)}</strong>` : '<span style="color:var(--red)">後五碼未回報</span>'}</div>
-            <div class="reg-card-row">${p.lineBound ? '💬 LINE 已綁定' : '<span style="color:var(--red)">💬 LINE 未綁定</span>'}</div>
+            <div class="reg-card-row">${p.lineBound ? '💬 LINE 已綁定' + (p.lineName ? '（' + esc(p.lineName) + '）' : '') : '<span style="color:var(--red)">💬 LINE 未綁定</span>'}</div>
             ${p.ig  ? `<div class="reg-card-row full">📸 <strong>${esc(p.ig)}</strong></div>` : ''}
             ${p.threads ? `<div class="reg-card-row full">🧵 <strong>${esc(p.threads)}</strong></div>` : ''}
             <div class="reg-card-row full" style="word-break:break-all">📧 ${esc(p.email)}</div>
